@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leptospirosis Prediction App</title>
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background-image: url("bacteria_864306-6590.avif");
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-color: #e0f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .formBox {
+      background-color: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+    .title {
+      text-align: center;
+      color: #004d40;
+      margin-bottom: 20px;
+      font-weight: bold;
+      font-size: 22px;
+    }
+    .formGroup { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; color: #004d40; }
+    input {
+      width: 100%; padding: 10px 12px; font-size: 16px;
+      border-radius: 6px; border: 1.5px solid #00897b; box-sizing: border-box;
+    }
+    button {
+      background-color: #00796b; color: white; padding: 12px 20px;
+      border: none; border-radius: 6px; font-size: 16px;
+      cursor: pointer; width: 100%; margin-top: 10px;
+    }
+    .logoutButton {
+      background-color: #d32f2f; color: white; padding: 10px 20px;
+      border: none; border-radius: 6px; font-size: 16px;
+      cursor: pointer; width: 100%; margin-top: 20px;
+    }
+    .error { color: red; font-size: 0.9em; margin: 4px 0 0 0; }
+    .result, .errormsg { margin-top: 20px; font-weight: bold; color: #004d40; }
+    .errormsg { color: red; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <!-- LOGIN VIEW -->
+  <div class="formBox" id="loginView">
+    <h2 class="title">Leptospirosis Prediction Login</h2>
+    <form id="loginForm">
+      <div class="formGroup">
+        <label>Username</label>
+        <input type="text" id="username" required placeholder="Enter username" />
+      </div>
+      <div class="formGroup">
+        <label>Password</label>
+        <input type="password" id="password" required placeholder="Enter password" />
+      </div>
+      <button type="submit">Login</button>
+      <button type="button" class="button" onclick="showSignup()">Sign Up</button>
+    </form>
+    <div id="loginError" class="error"></div>
+  </div>
+
+  <!-- SIGNUP VIEW -->
+  <div class="formBox hidden" id="signupView">
+    <h2 class="title">Sign Up</h2>
+    <form id="signupForm">
+      <div class="formGroup">
+        <label>Email</label>
+        <input type="email" id="email" required placeholder="Enter email" />
+      </div>
+      <div class="formGroup">
+        <label>Username</label>
+        <input type="text" id="signupUsername" required placeholder="Choose username" />
+      </div>
+      <div class="formGroup">
+        <label>Password</label>
+        <input type="password" id="signupPassword" required placeholder="Create password" />
+      </div>
+      <button type="submit">Sign Up</button>
+      <button type="button" class="button" onclick="showLogin()">Back to Login</button>
+    </form>
+    <div id="signupError" class="error"></div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div class="formBox hidden" id="dashboardView" style="text-align:center;">
+    <h2 class="title">Dashboard</h2>
+    <button class="button" onclick="showPrediction()">Prediction</button>
+    <button class="button" onclick="showOutbreak()">Outbreak</button>
+    <button class="logoutButton" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- PREDICTION VIEW -->
+  <div class="formBox hidden" id="predictionView">
+    <form id="predictionForm">
+      <h2 class="title">Prediction Input</h2>
+      <div class="formGroup">
+        <label>Fever (0 or 1)</label>
+        <input type="number" id="fever" min="0" max="1" required />
+        <div class="error" id="feverError"></div>
+      </div>
+      <div class="formGroup">
+        <label>Muscle Pain (0 or 1)</label>
+        <input type="number" id="muscle_pain" min="0" max="1" required />
+        <div class="error" id="musclePainError"></div>
+      </div>
+      <div class="formGroup">
+        <label>Jaundice (0 or 1)</label>
+        <input type="number" id="jaundice" min="0" max="1" required />
+        <div class="error" id="jaundiceError"></div>
+      </div>
+      <div class="formGroup">
+        <label>Red Eyes (0 or 1)</label>
+        <input type="number" id="red_eyes" min="0" max="1" required />
+        <div class="error" id="redEyesError"></div>
+      </div>
+      <div class="formGroup">
+        <label>Creatinine (float)</label>
+        <input type="number" id="creatinine" step="0.01" required />
+        <div class="error" id="creatinineError"></div>
+      </div>
+      <div class="formGroup">
+        <label>Platelets (integer)</label>
+        <input type="number" id="platelets" min="0" required />
+        <div class="error" id="plateletsError"></div>
+      </div>
+      <div class="formGroup">
+        <label>PCR (0 or 1)</label>
+        <input type="number" id="pcr" min="0" max="1" required />
+        <div class="error" id="pcrError"></div>
+      </div>
+      <button type="submit" class="button">Submit</button>
+    </form>
+    <button class="logoutButton" type="button" onclick="logout()">Logout</button>
+    <div id="predictionError" class="errormsg"></div>
+  </div>
+
+  <!-- RESULT VIEW -->
+  <div class="formBox hidden" id="resultView">
+    <h2 class="title">Prediction Result</h2>
+    <div id="resultDisplay" class="result"></div>
+    <button type="button" class="button" onclick="backToPrediction()">Back</button>
+    <button class="logoutButton" type="button" onclick="logout()">Logout</button>
+  </div>
+
+  <!-- OUTBREAK VIEW -->
+  <div class="formBox hidden" id="outbreakView">
+    <h2 class="title">Outbreak Input</h2>
+    <div class="formGroup">
+      <label>State</label>
+   <input type="text" id="state" placeholder="Enter state name (e.g., KERALA)" required list="stateList" autocomplete="off" />
+<datalist id="stateList"></datalist>
+
+    </div>
+    <button class="button" type="button" onclick="submitOutbreak()">Submit</button>
+    <button class="logoutButton" type="button" onclick="showDashboard()">Back</button>
+    <img id="outbreakGraph" alt="Graph" style="margin-top: 20px; max-width: 100%; height: auto; display:none;" />
+  </div>
+
+  <script>
+    // --- View logic ---
+    function showView(id) {
+      ["loginView","signupView","dashboardView","predictionView","resultView","outbreakView"]
+        .forEach((v) => document.getElementById(v).classList.add("hidden"));
+      document.getElementById(id).classList.remove("hidden");
+    }
+    function showLogin(){ showView("loginView"); }
+    function showSignup(){ showView("signupView"); }
+    function showDashboard(){ showView("dashboardView"); }
+    function showPrediction(){ showView("predictionView"); clearPredictionErrors(); }
+    function showResult(){ showView("resultView"); }
+    function showOutbreak(){ 
+      document.getElementById("outbreakGraph").style.display = "none";
+      showView("outbreakView"); 
+    }
+    function logout(){ showLogin(); }
+    function backToPrediction(){ showPrediction(); document.getElementById("resultDisplay").textContent=""; }
+
+    // Initial view
+    showLogin();
+
+    // Dummy login/signup (replace with real backend calls for production)
+    document.getElementById("loginForm").onsubmit = function(e){ e.preventDefault(); showDashboard(); };
+    document.getElementById("signupForm").onsubmit = function(e){ e.preventDefault(); alert("Account created successfully!"); showLogin(); };
+
+    // --- VALIDATION ---
+    function validateField(name, value) {
+      if (["fever","muscle_pain","jaundice","red_eyes","pcr"].includes(name)) return value==="0"||value==="1";
+      if (name==="creatinine") return /^-?\d+(\.\d+)?$/.test(value);
+      if (name==="platelets") return /^\d+$/.test(value);
+      return true;
+    }
+    function clearPredictionErrors() {
+      ["feverError","musclePainError","jaundiceError","redEyesError","creatinineError","plateletsError","pcrError"]
+        .forEach((id) => (document.getElementById(id).textContent=""));
+    }
+
+    // --- PREDICTION FORM SUBMIT ---
+    document.getElementById("predictionForm").onsubmit = async function(e){
+      e.preventDefault();
+      clearPredictionErrors();
+      var data = {
+        fever: document.getElementById("fever").value,
+        muscle_pain: document.getElementById("muscle_pain").value,
+        jaundice: document.getElementById("jaundice").value,
+        red_eyes: document.getElementById("red_eyes").value,
+        creatinine: document.getElementById("creatinine").value,
+        platelets: document.getElementById("platelets").value,
+        pcr: document.getElementById("pcr").value,
+      };
+      var valid=true;
+      Object.keys(data).forEach(function(name){
+        if(!validateField(name,data[name])){
+          document.getElementById(name==="muscle_pain"?"musclePainError":name+"Error").textContent=
+            name==="platelets"?"Must be an integer":name==="creatinine"?"Must be a float":"Only 0 or 1 allowed";
+          valid=false;
+        }
+      });
+      if(!valid) return;
+
+      var payload={
+        fever:parseInt(data.fever),
+        muscle_pain:parseInt(data.muscle_pain),
+        jaundice:parseInt(data.jaundice),
+        red_eyes:parseInt(data.red_eyes),
+        creatinine:parseFloat(data.creatinine),
+        platelets:parseInt(data.platelets),
+        pcr:parseInt(data.pcr),
+      };
+
+      try{
+        const res=await fetch("http://localhost:5001/api/predict",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify(payload)
+        });
+        const result=await res.json();
+        if(res.ok){
+          showResult();
+          document.getElementById("resultDisplay").innerHTML=`
+            Prediction Class: ${result.prediction}<br>
+            Probability Class 0: ${(result.probability_0*100).toFixed(2)}%<br>
+            Probability Class 1: ${(result.probability_1*100).toFixed(2)}%
+          `;
+        } else {
+          document.getElementById("predictionError").textContent=result.error||"Unknown error";
+        }
+      } catch(err){
+        document.getElementById("predictionError").textContent=err.message;
+      }
+    };
+
+    // --- OUTBREAK SUBMIT HANDLER WITH GRAPH ---
+    async function submitOutbreak(){
+      const state = document.getElementById("state").value.trim();
+
+      if(!state){
+        alert("Please enter a state name!");
+        return;
+      }
+
+      try {
+        // Data fetch
+        const res = await fetch("http://localhost:5000/api/outbreak_predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ state: state })
+        });
+
+        const result = await res.json();
+
+        if(res.ok){
+          let message = `Historical Data for ${result.state}:\n`;
+          for (const year in result.historical_cases) {
+            message += `${year}: ${result.historical_cases[year]}\n`;
+          }
+          alert(message.trim());
+
+          // Graph fetch
+          const graphRes = await fetch("http://localhost:5000/api/outbreak_predict/graph", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ state: state })
+          });
+
+          if(graphRes.ok){
+            const blob = await graphRes.blob();
+            const url = URL.createObjectURL(blob);
+            const img = document.getElementById('outbreakGraph');
+            img.src = url;
+            img.style.display = 'block';
+          } else {
+            alert("Graph loading failed");
+            document.getElementById('outbreakGraph').style.display = "none";
+          }
+        } else {
+          alert("Error: " + (result.error || "Unknown error"));
+          document.getElementById('outbreakGraph').style.display = "none";
+        }
+      } catch(err){
+        alert("Error: " + err.message);
+        document.getElementById('outbreakGraph').style.display = "none";
+      }
+    }
+const statesArray = [
+  'GOA','GUJARAT','MAHARASHTRA','UTTAR PRADESH','TAMIL NADU','BIHAR',
+  'DELHI','HARYANA','ASSAM','RAJASTHAN','KERALA','WEST BENGAL','KARNATAKA','PUNJAB'
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+  const datalist = document.getElementById('stateList');
+  datalist.innerHTML = '';
+  statesArray.forEach(state => {
+    const option = document.createElement('option');
+    option.value = state;
+    datalist.appendChild(option);
+  });
+});
+
+  </script>
+</body>
+</html>
